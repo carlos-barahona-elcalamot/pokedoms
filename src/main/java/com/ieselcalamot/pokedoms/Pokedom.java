@@ -1,4 +1,4 @@
-package com.ieselcalamot;
+package com.ieselcalamot.pokedoms;
 
 public class Pokedom {
     private String nombre;
@@ -6,11 +6,11 @@ public class Pokedom {
     private float ataque;
     private float defensa;
 
-    Pokedom(String nombre, String familia) {
+    public Pokedom(String nombre, String familia) {
         this(nombre,familia,0f,0f);
     }
 
-    Pokedom(String nombre, String familia, float ataque, float defensa) {
+    public Pokedom(String nombre, String familia, float ataque, float defensa) {
         this.nombre=nombre;
         this.familia=familia;
         this.ataque=ataque;
@@ -39,6 +39,11 @@ public class Pokedom {
 
     public void setDefensa(float defensa) {
         this.defensa = defensa;
+    }
+
+    @Override
+    public String toString() {
+        return getNombre().toUpperCase()+"\nFamily: "+getFamilia()+"\nAttack power: "+getAtaque()+"\nDefense power: "+getDefensa()+"\n";
     }
 
 }

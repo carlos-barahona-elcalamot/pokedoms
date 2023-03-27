@@ -1,5 +1,14 @@
 package com.ieselcalamot;
 
+import java.io.File;
+import java.io.IOException;
+
+import com.ieselcalamot.pokedoms.FileFormatException;
+import com.ieselcalamot.pokedoms.Pokedom;
+import com.ieselcalamot.pokedoms.PokedomAlreadyExistsException;
+import com.ieselcalamot.pokedoms.PokedomsDb;
+import com.ieselcalamot.pokedoms.UnknownPokedomException;
+
 public class PokedomsBasicCmd {
 
     public static void main(String[] args) {
@@ -26,15 +35,57 @@ public class PokedomsBasicCmd {
             lista[i] = new Pokedom(noms[i], families[i], atacs[i], defenses[i]);
         }
 
-        PokedomsDb db = new PokedomsDb(lista);
-        Pokedom pokedomDemanat=db.describe(args[0]);
-        if (pokedomDemanat!=null) {
-            System.out.println("Nom: "+pokedomDemanat.getNombre());
-            System.out.println("Familía: "+pokedomDemanat.getFamilia());
-            System.out.println("Atac: "+pokedomDemanat.getAtaque());
-            System.out.println("Defensa: "+pokedomDemanat.getDefensa());
-        } else {
-            System.out.println("No conec aquest Pokedom.");
+        PokedomsDb db = null;
+        try {
+            db = new PokedomsDb(new File(args[0]));
+        } catch (IOException e) {
+            System.out.println("ERROR: cannot accés database file.");
+            e.printStackTrace();
+            System.exit(1);
+        } catch (FileFormatException e) {
+            System.out.println("ERROR: format error in the database file.");
+            e.printStackTrace();
+            System.exit(2);
+        }
+        switch (args[1].toLowerCase()) {
+            case "describe":
+                Pokedom pokedomDemanat;
+                try {
+                    pokedomDemanat = db.find(args[2]);
+                    System.out.println(pokedomDemanat);
+                } catch (UnknownPokedomException e) {
+                    System.out.println("ERROR: pokedom desconegut.");
+                    e.printStackTrace();
+                }
+                break;
+            case "add":
+                Pokedom nuevPokedom = new Pokedom(args[2], args[3]);
+                if (args.length >= 5 && args.length < 7) {
+                    nuevPokedom.setAtaque(Float.parseFloat(args[4]));
+                    if (args.length == 6) {
+                        nuevPokedom.setDefensa(Float.parseFloat(args[5]));
+                    }
+
+                } else {
+                    System.out.println("ERROR: incorrect number of arguments.");
+                    System.exit(2);
+                }
+                try {
+                    db.addPokedom(nuevPokedom);
+                } catch (IOException e) {
+                    System.out.println("ERROR: cannot write to database");
+                    e.printStackTrace();
+                    System.exit(3);
+                } catch (PokedomAlreadyExistsException e) {
+                    System.out.println("ERROR: this pokedom already exist. Try changing its name.");
+                    e.printStackTrace();
+                    System.exit(3);
+                }
+                break;
+
+            default:
+                System.out.println("ERROR: comanda desconeguda.");
+                break;
         }
     }
 }
